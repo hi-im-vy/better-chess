@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=3 uid="uid://b2lgdfmsg7kyb"]
+
+[ext_resource type="Texture2D" uid="uid://dis6e1kh4v0n5" path="res://Art/Default/Chess_board_2.png" id="1_2wvcj"]
+[ext_resource type="Script" uid="uid://b8fecly24810l" path="res://Scenes/Chess.gd" id="2_uh3b8"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2wvcj"]
+size = Vector2(144, 144)
+
+[node name="Board" type="Sprite2D"]
+position = Vector2(72, 72)
+texture = ExtResource("1_2wvcj")
+script = ExtResource("2_uh3b8")
+
+[node name="Pieces" type="Node2D" parent="."]
+position = Vector2(-72, -72)
+
+[node name="Dots" type="Node2D" parent="."]
+position = Vector2(-72, -72)
+
+[node name="Turn" type="Sprite2D" parent="."]
+z_index = -10
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_2wvcj")
+
+[connection signal="input_event" from="Area2D" to="." method="_on_area_2d_input_event"]
