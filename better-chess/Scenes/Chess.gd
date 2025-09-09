@@ -444,7 +444,8 @@ func IsValidSpace(myVector : Vector2) -> bool:
 	if (myVector.x < 0 || myVector.x > (_boardSize.x-1) || myVector.y < 0 || myVector.y > (_boardSize.y-1)):
 		return false;
 	return true;
-	
+
+#check for checkmate and stalemate given a board and a turn	
 func CheckForCheckmateAndStalemate(varBoard, isWhite) -> void:
 	var possibleMoves = []
 	for i in varBoard.keys():
