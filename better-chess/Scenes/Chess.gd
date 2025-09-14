@@ -53,6 +53,7 @@ var myRightWhiteRookMoved = false;
 var myLeftBlackRookMoved = false;
 var myRightBlackRookMoved = false;
 var myLastMove;
+var myTurnCount;
 
 #global constants
 const stateSelect = "Select"
@@ -67,6 +68,8 @@ func _ready() -> void:
 	myPromotionSquare = null;
 	myIsWhiteTurn = true;
 	myLastMove = LastMove.new()
+	
+	myTurnCount = 1;
 	
 	SetBoardStateToSelect();
 	
@@ -132,7 +135,11 @@ func _square_clicked(square_name) -> void:
 					ShowOptionsForSelectedPiece()
 						
 	elif (IsBoardStateConfirm()):
-		MoveSelectedPiece(localMouseVector)	
+		var pieceMoved = MoveSelectedPiece(localMouseVector)
+		if (pieceMoved):
+			RunEnemyTurn()
+			myTurnCount = myTurnCount + 1
+			print("current turn is " + str(myTurnCount))	
 
 func _on_promotion_button_pressed(button):
 	var buttonName = button.name
@@ -195,11 +202,61 @@ func DisplayBoard() -> void:
 		myTurn.texture = _blackTurn
 		
 			
+func RunEnemyTurn() -> void:
+	#first see if able to attack
+	var enemyAttacked = AttackWhite()
+	if (!enemyAttacked):
+		#spawn a random black piece
+		#print("no attack, spawning piece")
+		SpawnRandomBlackPiece()
+	#display board and set to select and white turn
+	SetBoardStateToSelect()
+	myIsWhiteTurn = true
+	myTurn.texture = _whiteTurn
+	DisplayBoard()
+	CheckForCheckmateAndStalemate(myBoard, myIsWhiteTurn)
+
+#returns true if attacked a white piece, returns false if didn't 
+func AttackWhite() -> bool:
+	var returnBool = false;
+	
+	#iterate through all possible black moves, looking for an attack move
+	var possibleAttacks = []
+	for i in myBoard.keys():
+		var curPiece = myBoard[i]
+		if (!curPiece.IsWhite()):
+			var checkMoves = GetMovesForGivenPiece(i)
+			
+			var pieceAttacks = []
+			for j in checkMoves:
+				if (myBoard.has(j)):
+					var checkPiece = myBoard[j]
+					if (checkPiece.IsWhite()):
+						pieceAttacks.append([curPiece,i,j])
+				
+			
+			possibleAttacks.append_array(pieceAttacks)
+	
+	#if possible attacks have been found, choose one randomly to do
+	if (possibleAttacks != []):		
+		#print(possibleAttacks)
+		var chosenAttack = possibleAttacks.pick_random()
+		CapturePiece(chosenAttack[0], myBoard[chosenAttack[2]], chosenAttack[2])
+		myBoard[chosenAttack[2]] = chosenAttack[0]
+		myBoard.erase(chosenAttack[1])
+		returnBool = true
+		#print(myBoard)
+	else:
+		#print("no attacking pieces!")
+		pass
+	
+	return returnBool;
 			
 			
-			
-			
-func MoveSelectedPiece(moveVector : Vector2) -> void:
+
+#returns true if moved a piece, false if not
+func MoveSelectedPiece(moveVector : Vector2) -> bool:
+	var returnBool = true;
 	#print("in MoveSelectedPiece with moveVector " + str(moveVector))
 	var findMove = myMoves.find(moveVector);
 	#print(findMove)
@@ -318,10 +375,15 @@ func MoveSelectedPiece(moveVector : Vector2) -> void:
 		DisplayBoard()
 		
 		#myLastMove.PrintLastMove();
+	else:
+		#print("not a move!")
+		returnBool = false;
 	mySelectedPieceVector = Vector2(-1,-1)
 	myMoves = []
 	HideDots()
 	SetBoardStateToSelect()
+	
+	return returnBool;
 	
 func PromoteHere(thisVector : Vector2, isWhite : bool):
 	myPromotionSquare = thisVector
@@ -1198,15 +1260,23 @@ func SetWhiteStart() -> void:
 
 func SetBlackStart(numPieces : int) -> void:
 	for i in range(0,numPieces):
-		var newPiece = Piece.new();
-		newPiece.MakeRandomBlackPiece();
-		var checkPos = GetRandomEnemySpawnOnce()
-		if (checkPos.x < 0 || checkPos.y < 0):
-			newPiece.MakeBlackPawn()
-			checkPos = GetRandomEnemySpawnMany()
-		myBoard[checkPos] = newPiece
+		SpawnRandomBlackPiece()
+		#var newPiece = Piece.new();
+		#newPiece.MakeRandomBlackPiece();
+		#var checkPos = GetRandomEnemySpawnOnce()
+		#if (checkPos.x < 0 || checkPos.y < 0):
+			#newPiece.MakeBlackPawn()
+			#checkPos = GetRandomEnemySpawnMany()
+		#myBoard[checkPos] = newPiece
 
-		
+func SpawnRandomBlackPiece():
+	var newPiece = Piece.new();
+	newPiece.MakeRandomBlackPiece();
+	var checkPos = GetRandomEnemySpawnOnce()
+	if (checkPos.x < 0 || checkPos.y < 0):
+		newPiece.MakeBlackPawn()
+		checkPos = GetRandomEnemySpawnMany()
+	myBoard[checkPos] = newPiece
 
 #one roll of the die for enemy spawn location - except if it ends up on white
 func GetRandomEnemySpawnOnce() -> Vector2:

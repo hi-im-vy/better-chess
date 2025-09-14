@@ -18,6 +18,15 @@ var CurrentInventory
 #needed classes
 const Piece = preload("res://Classes/Piece.gd")
 
+#base values for pieces
+const QueenBaseValue = 9
+const RookBaseValue = 5
+const KnightBaseValue = 3
+const BishopBaseValue = 3
+const PawnBaseValue = 1
+
+
+
 func StartPlayerAtLevel0():
 	CurrentLevel = 0
 	CurrentGold = 0
