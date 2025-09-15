@@ -3,6 +3,9 @@ extends Node
 #current level of the game
 var CurrentLevel
 
+#current turns allowed
+var CurrentTurnLimit
+
 #how much gold the player has on them currently
 var CurrentGold
 
@@ -67,6 +70,7 @@ func GetCurrentGoalValueBasedOnPlayerLevel() -> int:
 func StartPlayerAtLevel0():
 	CurrentLevel = 0
 	CurrentGold = 0
+	CurrentTurnLimit = 10
 	
 	#build starting army
 	CurrentArmy = {}

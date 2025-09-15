@@ -34,6 +34,18 @@ const TextureHolder = preload("res://Scenes/texture_holder.tscn")
 @onready var myTurn = $Turn
 @onready var WhitePromotionButtons = $"../CanvasLayer/White Pieces"
 @onready var BlackPromotionButtons = $"../CanvasLayer/Black Pieces"
+@onready var TurnCounter = $"../CanvasLayer/TurnTitle/TurnCounter"
+@onready var ScoreCounter = $"../CanvasLayer/ScoreTitle/ScoreCounter"
+@onready var GoalCounter = $"../CanvasLayer/GoalTitle/GoalCounter"
+@onready var QueenValueCounter = $"../CanvasLayer/PieceValueTitle/QueenValueTitle/QueenValueCounter"
+@onready var RookValueCounter = $"../CanvasLayer/PieceValueTitle/RookValueTitle/RookValueCounter"
+@onready var BishopValueCounter = $"../CanvasLayer/PieceValueTitle/BishopValueTitle/BishopValueCounter"
+@onready var KnightValueCounter = $"../CanvasLayer/PieceValueTitle/KnightValueTitle/KnightValueCounter"
+@onready var PawnValueCounter = $"../CanvasLayer/PieceValueTitle/PawnValueTitle/PawnValueCounter"
+@onready var MultCounter = $"../CanvasLayer/MultTitle/MultCounter"
+@onready var Message0 = $"../CanvasLayer/MessageCenter/Message0"
+@onready var Message1 = $"../CanvasLayer/MessageCenter/Message1"
+@onready var Message2 = $"../CanvasLayer/MessageCenter/Message2"
 
 #class references
 const Piece = preload("res://Classes/Piece.gd")
@@ -54,8 +66,11 @@ var myLeftBlackRookMoved = false;
 var myRightBlackRookMoved = false;
 var myLastMove;
 var myTurnCount;
+var myTurnLimitCount;
 var myCurScore;
 var myCurGoal;
+var myCurMult;
+var myMessages;
 
 #global constants
 const stateSelect = "Select"
@@ -71,11 +86,15 @@ func _ready() -> void:
 	myIsWhiteTurn = true;
 	myLastMove = LastMove.new()
 	
-	myTurnCount = 1;
-	myCurScore = 0;
-	myCurGoal = PlayerVariables.GetCurrentGoalValueBasedOnPlayerLevel()
+	SetScoreAndGoal(0, PlayerVariables.GetCurrentGoalValueBasedOnPlayerLevel());
+	SetTurnAndTurnLimitCount(1, PlayerVariables.CurrentTurnLimit);
+	SetPieceValueCounters();
+	
+	ResetMult();
 	
 	SetBoardStateToSelect();
+	
+	ClearMessageBoard();
 	
 	SetNewBoard();
 	#SetClassicBoard();
@@ -142,8 +161,10 @@ func _square_clicked(square_name) -> void:
 		var pieceMoved = MoveSelectedPiece(localMouseVector)
 		if (pieceMoved):
 			RunEnemyTurn()
-			myTurnCount = myTurnCount + 1
-			print("current turn is " + str(myTurnCount))	
+			IncrementTurnCount()
+			if (myTurnCount > myTurnLimitCount):
+				GameOverByTurnLimit()
+			#print("current turn is " + str(myTurnCount))	
 
 func _on_promotion_button_pressed(button):
 	var buttonName = button.name
@@ -205,6 +226,65 @@ func DisplayBoard() -> void:
 	else:
 		myTurn.texture = _blackTurn
 		
+
+func SetPieceValueCounters():	
+	#queen
+	QueenValueCounter.text = str(PlayerVariables.GetCurrentQueenValue())
+	#rook
+	RookValueCounter.text = str(PlayerVariables.GetCurrentRookValue())
+	#bishop
+	BishopValueCounter.text = str(PlayerVariables.GetCurrentBishopValue())
+	#knight
+	KnightValueCounter.text = str(PlayerVariables.GetCurrentKnightValue())
+	#pawn
+	PawnValueCounter.text = str(PlayerVariables.GetCurrentPawnValue())
+	
+func ClearMessageBoard():
+	myMessages = []
+	Message0.text = "";
+	Message1.text = "";
+	Message2.text = "";
+	
+func PushMessage(thisString):
+	myMessages.push_front(thisString)
+	
+	Message0.text = myMessages[0]
+	
+	if (myMessages.size() > 1):
+		Message1.text = myMessages[1]
+	
+	if (myMessages.size() > 2):
+		Message2.text = myMessages[2]
+
+	
+
+func ResetMult():
+	myCurMult = 1;
+	MultCounter.text = str(myCurMult);
+	
+func IncrementMult(thisIncrement):
+	myCurMult = myCurMult + thisIncrement;
+	MultCounter.text = str(myCurMult);
+
+		
+func SetTurnAndTurnLimitCount(thisTurnCount, thisTurnLimitCount):
+	myTurnCount = thisTurnCount
+	myTurnLimitCount = thisTurnLimitCount
+	TurnCounter.text = str(myTurnCount) + "/" + str(myTurnLimitCount)
+	
+func IncrementTurnCount():
+	myTurnCount = myTurnCount + 1
+	TurnCounter.text = str(myTurnCount) + "/" + str(myTurnLimitCount)
+	
+func SetScoreAndGoal(thisScore, thisGoal):
+	myCurScore = thisScore;
+	myCurGoal = thisGoal;
+	ScoreCounter.text = str(myCurScore);
+	GoalCounter.text = str(myCurGoal);
+	
+func IncrementScore(thisIncrement):
+	myCurScore = myCurScore + thisIncrement;
+	ScoreCounter.text = str(myCurScore);
 			
 func RunEnemyTurn() -> void:
 	#first see if able to attack
@@ -359,8 +439,14 @@ func MoveSelectedPiece(moveVector : Vector2) -> bool:
 			#capturing a piece
 			CapturePiece(myBoard[mySelectedPieceVector], myBoard[moveVector], moveVector)
 			myLastMove.SetLastMove(myBoard[mySelectedPieceVector], mySelectedPieceVector, moveVector, myBoard[moveVector])
+			#increment mult for white captures
+			if (myIsWhiteTurn):
+				IncrementMult(1)
 		else:
 			myLastMove.SetLastMove(myBoard[mySelectedPieceVector], mySelectedPieceVector, moveVector)
+			#reset mult if white moves without capturing
+			if (myIsWhiteTurn):
+				ResetMult()
 		myBoard[moveVector] = myBoard[mySelectedPieceVector]
 		myBoard.erase(mySelectedPieceVector)
 
@@ -398,15 +484,29 @@ func PromoteHere(thisVector : Vector2, isWhite : bool):
 		
 
 func CapturePiece(capturingPiece : Piece, capturedPiece : Piece, captureVector : Vector2) -> void:
-	print("Capturing " + capturedPiece.GetColorType() + " with " + capturingPiece.GetColorType() + " at " + str(captureVector))
+	#print("Capturing " + capturedPiece.GetColorType() + " with " + capturingPiece.GetColorType() + " at " + str(captureVector))
+	var messageString = capturingPiece.GetColorType() + " takes " + capturedPiece.GetColorType() + "!"
+	PushMessage(messageString)
+	
 	if (capturingPiece.IsWhite()):
-		myCurScore = myCurScore + PlayerVariables.GetCurrentPieceValue(capturedPiece)
-		print("current score is: " + str(myCurScore))
+		var scoreIncrement = PlayerVariables.GetCurrentPieceValue(capturedPiece) * myCurMult;
+		IncrementScore(scoreIncrement)
+		#print("current score is: " + str(myCurScore))
 		if (myCurScore >= myCurGoal):
 			EndRound()
 			
 func EndRound():
-	print("YOU WIN! End at turn " + str(myTurnCount))
+	#print("YOU WIN! End at turn " + str(myTurnCount))
+	PushMessage("YOU WIN! On Turn " + str(myTurnCount))
+	
+func GameOverByCheckmate():
+	PushMessage("YOU LOSE by Checkmate")
+
+func GameOverByStalemate():
+	PushMessage("YOU LOSE by Stalemate")
+
+func GameOverByTurnLimit():
+	PushMessage("YOU LOSE by Turn Limit")
 	
 
 #changes a board vector (like (0,1)) into a global position based on cell width
@@ -530,13 +630,16 @@ func CheckForCheckmateAndStalemate(varBoard, isWhite) -> void:
 	if (possibleMoves == []):
 		#print("No moves left!")
 		if (IsInCheck(varBoard, isWhite)):
-			print("Checkmate!")
+			#print("Checkmate!")
 			if (isWhite):
-				print("Black wins!")
+				#print("Black wins!")
+				GameOverByCheckmate()
 			else:
-				print("White wins!")
+				#print("White wins!")
+				EndRound()
 		else:
-			print("Stalemate!")
+			#print("Stalemate!")
+			GameOverByStalemate()
 	
 func IsInCheck(varBoard, isWhite) -> bool:
 	var returnBool = false;
