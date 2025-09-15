@@ -26,6 +26,43 @@ const BishopBaseValue = 3
 const PawnBaseValue = 1
 
 
+func GetCurrentPieceValue(thisPiece : Piece) -> int:
+	var returnInt = 0
+	
+	if (thisPiece.IsQueen()):
+		returnInt = GetCurrentQueenValue()
+	elif (thisPiece.IsBishop()):
+		returnInt = GetCurrentBishopValue()
+	elif (thisPiece.IsRook()):
+		returnInt = GetCurrentRookValue()
+	elif (thisPiece.IsKnight()):
+		returnInt = GetCurrentKnightValue()
+	elif (thisPiece.IsPawn()):
+		returnInt = GetCurrentPawnValue()
+
+	return returnInt
+	
+func GetCurrentQueenValue() -> int:
+	return QueenBaseValue
+
+func GetCurrentRookValue() -> int:
+	return RookBaseValue
+
+func GetCurrentBishopValue() -> int:
+	return BishopBaseValue
+
+func GetCurrentKnightValue() -> int:
+	return KnightBaseValue
+
+func GetCurrentPawnValue() -> int:
+	return PawnBaseValue
+	
+func GetCurrentGoalValueBasedOnPlayerLevel() -> int:
+	var returnInt = 0;
+	
+	returnInt = (CurrentLevel * 10) + 10;
+	
+	return returnInt;
 
 func StartPlayerAtLevel0():
 	CurrentLevel = 0

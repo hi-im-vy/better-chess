@@ -54,6 +54,8 @@ var myLeftBlackRookMoved = false;
 var myRightBlackRookMoved = false;
 var myLastMove;
 var myTurnCount;
+var myCurScore;
+var myCurGoal;
 
 #global constants
 const stateSelect = "Select"
@@ -70,6 +72,8 @@ func _ready() -> void:
 	myLastMove = LastMove.new()
 	
 	myTurnCount = 1;
+	myCurScore = 0;
+	myCurGoal = PlayerVariables.GetCurrentGoalValueBasedOnPlayerLevel()
 	
 	SetBoardStateToSelect();
 	
@@ -395,6 +399,14 @@ func PromoteHere(thisVector : Vector2, isWhite : bool):
 
 func CapturePiece(capturingPiece : Piece, capturedPiece : Piece, captureVector : Vector2) -> void:
 	print("Capturing " + capturedPiece.GetColorType() + " with " + capturingPiece.GetColorType() + " at " + str(captureVector))
+	if (capturingPiece.IsWhite()):
+		myCurScore = myCurScore + PlayerVariables.GetCurrentPieceValue(capturedPiece)
+		print("current score is: " + str(myCurScore))
+		if (myCurScore >= myCurGoal):
+			EndRound()
+			
+func EndRound():
+	print("YOU WIN! End at turn " + str(myTurnCount))
 	
 
 #changes a board vector (like (0,1)) into a global position based on cell width
