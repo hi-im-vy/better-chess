@@ -18,8 +18,27 @@ var CurrentPassives
 #current player items
 var CurrentInventory
 
+#result from latest round
+var LastRoundResult
+
+#base gold per round win
+var BaseGoldGain
+#starting constant
+const BaseGoldGainStart = 2
+
+#max gold for winning turns early
+var MaxGoldGainFromTurns
+#starting constant
+const MaxGoldGainFromTurnsStart = 10
+
+#max gold gain per round
+var MaxGoldGainPerRound
+#starting constant
+const MaxGoldGainPerRoundStart = 20
+
 #needed classes
 const Piece = preload("res://Classes/Piece.gd")
+const Result = preload("res://Classes/Result.gd")
 
 #base values for pieces
 const QueenBaseValue = 9
@@ -89,7 +108,17 @@ func StartPlayerAtLevel0():
 	kingPiece.StartingLocation = kingStart
 	CurrentArmy[kingPiece] = kingStart
 	
+	#set base gold gain values
+	BaseGoldGain = BaseGoldGainStart
+	MaxGoldGainFromTurns = MaxGoldGainFromTurnsStart
+	MaxGoldGainPerRound = MaxGoldGainPerRoundStart
+	
 	#wipe passives and inventory
 	CurrentPassives = {}
 	CurrentInventory = {}
+	
+	#set last round result to new
+	LastRoundResult = Result.new()
+	
+	
 	

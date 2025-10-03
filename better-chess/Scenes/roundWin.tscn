@@ -1,0 +1,53 @@
+[gd_scene load_steps=2 format=3 uid="uid://74tn1tqs3l8r"]
+
+[ext_resource type="Script" uid="uid://du1syj2e2ctgn" path="res://Scenes/roundWin.gd" id="1_jyq4e"]
+
+[node name="RoundWin" type="Node2D"]
+script = ExtResource("1_jyq4e")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="RoundWinTitle" type="Label" parent="CanvasLayer"]
+offset_left = 520.0
+offset_top = 232.0
+offset_right = 640.0
+offset_bottom = 260.0
+theme_override_font_sizes/font_size = 20
+text = "Round Won!"
+
+[node name="ScoreTitle" type="Label" parent="CanvasLayer"]
+offset_left = 496.0
+offset_top = 272.0
+offset_right = 552.0
+offset_bottom = 295.0
+text = "Score:"
+
+[node name="ScoreCounter" type="Label" parent="CanvasLayer/ScoreTitle"]
+layout_mode = 0
+offset_left = 56.0
+offset_right = 96.0
+offset_bottom = 23.0
+text = "0"
+
+[node name="TurnTitle" type="Label" parent="CanvasLayer"]
+offset_left = 496.0
+offset_top = 295.0
+offset_right = 537.0
+offset_bottom = 318.0
+text = "Turn:"
+
+[node name="TurnCounter" type="Label" parent="CanvasLayer/TurnTitle"]
+layout_mode = 0
+offset_left = 56.0
+offset_right = 96.0
+offset_bottom = 23.0
+text = "0"
+
+[node name="GoldCounter" type="Label" parent="CanvasLayer"]
+offset_left = 496.0
+offset_top = 320.0
+offset_right = 720.0
+offset_bottom = 424.0
+text = "0"

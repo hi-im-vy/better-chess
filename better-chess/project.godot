@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Better Chess"
-run/main_scene="uid://df0jsu70eqvyi"
+run/main_scene="uid://dopwyxvtq5rrg"
 config/features=PackedStringArray("4.4", "GL Compatibility")
 config/icon="res://icon.svg"
 

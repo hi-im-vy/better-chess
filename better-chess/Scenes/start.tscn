@@ -1,0 +1,27 @@
+[gd_scene load_steps=2 format=3 uid="uid://dopwyxvtq5rrg"]
+
+[ext_resource type="Script" uid="uid://bqbwd3cprubqv" path="res://Scenes/start.gd" id="1_3bxa3"]
+
+[node name="Start" type="Node2D"]
+script = ExtResource("1_3bxa3")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Title" type="Label" parent="CanvasLayer"]
+offset_left = 456.0
+offset_top = 280.0
+offset_right = 730.0
+offset_bottom = 336.0
+theme_override_font_sizes/font_size = 40
+text = "BETTER CHESS"
+
+[node name="Button" type="Button" parent="CanvasLayer"]
+offset_left = 528.0
+offset_top = 360.0
+offset_right = 640.0
+offset_bottom = 400.0
+text = "Start"
+
+[connection signal="pressed" from="CanvasLayer/Button" to="." method="_on_button_pressed"]

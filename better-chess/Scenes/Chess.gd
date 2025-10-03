@@ -499,14 +499,39 @@ func EndRound():
 	#print("YOU WIN! End at turn " + str(myTurnCount))
 	PushMessage("YOU WIN! On Turn " + str(myTurnCount))
 	
+	#set results
+	PlayerVariables.LastRoundResult.Score = myCurScore
+	PlayerVariables.LastRoundResult.ScoreGoal = myCurGoal
+	PlayerVariables.LastRoundResult.TurnCount = myTurnCount
+	PlayerVariables.LastRoundResult.TurnMax = myTurnLimitCount
+	
+	#go to round win screen
+	Global.goto_scene("res://Scenes/roundWin.tscn")
+	
 func GameOverByCheckmate():
 	PushMessage("YOU LOSE by Checkmate")
+	PlayerVariables.LastRoundResult.SetLoseReasonToCheckmate()
+	GameOver()
 
 func GameOverByStalemate():
 	PushMessage("YOU LOSE by Stalemate")
+	PlayerVariables.LastRoundResult.SetLoseReasonToStalemate()
+	GameOver()
 
 func GameOverByTurnLimit():
 	PushMessage("YOU LOSE by Turn Limit")
+	PlayerVariables.LastRoundResult.SetLoseReasonToTurnLimit()
+	GameOver()
+	
+func GameOver():
+	#set results
+	PlayerVariables.LastRoundResult.Score = myCurScore
+	PlayerVariables.LastRoundResult.ScoreGoal = myCurGoal
+	PlayerVariables.LastRoundResult.TurnCount = myTurnCount
+	PlayerVariables.LastRoundResult.TurnMax = myTurnLimitCount
+	
+	#go to game over screen
+	Global.goto_scene("res://Scenes/gameOver.tscn")
 	
 
 #changes a board vector (like (0,1)) into a global position based on cell width
